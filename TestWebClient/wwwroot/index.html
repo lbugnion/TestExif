@@ -39,7 +39,7 @@
                 </tr>
                 <tr v-for="picture in pictures">
                     <td>
-                        <a :href="picture.link"><img :src="picture.blobUrl" width="100" /></a>
+                        <a :href="picture.link"><img :src="picture.blobUrl" :title="picture.name" width="100" /></a>
                     </td>
                     <td>
                         <a :href="picture.link">{{ picture.name }}</a>
