@@ -6,7 +6,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TestExifFunctions.Model;
 
@@ -23,6 +22,8 @@ namespace TestExifFunctions
             HttpRequest req,
             ILogger log)
         {
+            log.LogInformation("-> GetAllPictures");
+
             try
             {
                 var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
@@ -38,6 +39,7 @@ namespace TestExifFunctions
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
                 return new UnprocessableEntityObjectResult(ex.Message);
             }
         }
