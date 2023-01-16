@@ -55,11 +55,14 @@ namespace TestExifFunctions
                 var format = tuple.Format;
                 var values = image.Metadata.ExifProfile.Values;
 
+                var blobUrlMask = Environment.GetEnvironmentVariable(Constants.BlobUrlMaskVariableName);
+
                 var existingMedata = new PictureMetadata
                 {
                     Name = blobName,
                     Artist = Constants.ArtistName,
-                    PartitionKey = Constants.UniquePartitionKey
+                    PartitionKey = Constants.UniquePartitionKey,
+                    BlobUrl = string.Format(blobUrlMask, blobName)
                 };
 
                 foreach (var value in values)

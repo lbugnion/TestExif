@@ -28,5 +28,7 @@ namespace TestExifFunctions.Model
         public string PartitionKey { get; set; }
 
         public string TakenDateTime { get; set; }
+
+        public string BlobUrl { get; set; }
     }
 }

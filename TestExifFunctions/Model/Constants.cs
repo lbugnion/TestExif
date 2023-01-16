@@ -9,5 +9,6 @@
         public const string DatabaseName = "PicturesDb";
         public const string UniquePartitionKey = "partition";
         public const string UploadsFolderName = "uploads";
+        public const string BlobUrlMaskVariableName = "BlobUrlMask";
     }
 }
