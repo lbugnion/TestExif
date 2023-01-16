@@ -1,26 +1,26 @@
 ### LOCAL Add
 GET http://localhost:7041/api/add-metadata/el20221106002.jpg
 
-### LOCAL Set
-POST http://localhost:7041/api/set-metadata/el20221106002.jpg
-
-{
-    "description" : "This is a test description"
-}
-
 ### REMOTE Add
 GET https://testexiflinux.azurewebsites.net/api/add-metadata/el20221106002.jpg
 
-### LOCAL Get
-GET http://localhost:7041/api/metadata/el20221202018D.jpg
-
 ### LOCAL Get all pictures
-GET http://localhost:7024/api/pictures
+GET http://localhost:7041/api/pictures
 
 ### LOCAL Set picture
-POST http://localhost:7024/api/picture
+POST http://localhost:7041/api/picture/el20221106002.jpg
 
 {
-    "name": "el20221106002.jpg",
-    "description": "Another test description"
+    "Artist": "Laurent Bugnion",
+    "CameraMake": null,
+    "CameraModel": null,
+    "Description": "Another test description again",
+    "GoogleLocationUrl": "https://www.google.com/maps/search/?api=1&query=14.088055555555556,120.89833333333334",
+    "id": "el20221106002.jpg",
+    "Latitude": 14.088055555555556,
+    "Longitude": 120.89833333333334,
+    "Name": "el20221106002.jpg",
+    "PartitionKey": "partition",
+    "TakenDateTime": "2022:11:06 10:28:51",
+    "BlobUrl": "https://testexiflinuxstorage.blob.core.windows.net/outputs/el20221106002.jpg",
 }
