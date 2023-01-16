@@ -10,12 +10,18 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp;
 using System.Text;
+using TestExifFunctions.Model;
+using System.Configuration;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace TestExifFunctions
 {
     public static class AddMetadata
     {
         private const string ArtistName = "Laurent Bugnion";
+        private const string UniquePartitionKey = "partition";
 
         [FunctionName(nameof(AddMetadata))]
         public static async Task<IActionResult> Run(
@@ -29,6 +35,21 @@ namespace TestExifFunctions
             Stream inputBlob,
             [Blob($"outputs/{{blobName}}", FileAccess.Write, Connection = "AzureWebJobsStorage")]
             Stream outputBlob,
+            //[CosmosDB(
+            //    databaseName: "PicturesDb",
+            //    containerName: "Pictures",
+            //    Connection = "CosmosDBConnection",
+            //    CreateIfNotExists = true,
+            //    PartitionKey = "partition",
+            //    Id = "{blobName}")]
+            //PictureMetadata existingMedata,
+            [CosmosDB(
+                databaseName: "PicturesDb",
+                containerName: "Pictures",
+                Connection = "CosmosDBConnection",
+                CreateIfNotExists = true,
+                PartitionKey = "partition")]
+            IAsyncCollector<PictureMetadata> collector,
             ILogger log)
         {
             if (inputBlob == null)
@@ -38,46 +59,51 @@ namespace TestExifFunctions
                 return new BadRequestObjectResult(message);
             }
 
-            Image image = null;
-            IImageFormat format = null;
-
             var tuple = await Image.LoadWithFormatAsync(inputBlob);
-            image = tuple.Image;
-            format = tuple.Format;
-
+            var image = tuple.Image;
+            var format = tuple.Format;
             var values = image.Metadata.ExifProfile.Values;
+
+            var existingMedata = new PictureMetadata
+            {
+                Name = blobName,
+                Artist = ArtistName,
+                PartitionKey = UniquePartitionKey
+            };
+
+            //if (existingMedata == null)
+            //{
+            //    var existingMedata = new PictureMetadata
+            //    {
+            //        Name = blobName,
+            //        id = blobName.Replace(".", "-"),
+            //        Artist = ArtistName,
+            //        PartitionKey = UniquePartitionKey
+            //    };
+            //}
 
             foreach (var value in values)
             {
                 if (value.IsArray)
                 {
-                    byte[]? array = value.GetValue() as byte[];
+                    if (value.Tag == ExifTag.GPSLatitude
+                        || value.Tag == ExifTag.GPSLongitude)
+                    {
+                        var coordinateArray = (Rational[])value.GetValue();
+                        var coordinate =
+                            coordinateArray[0].Numerator
+                            + (coordinateArray[1].Numerator / 60D)
+                            + ((coordinateArray[2].Numerator / 1000000D) / 3600D);
 
-                    if (array != null)
-                    {
-                        var encoding = new ASCIIEncoding();
-                        var text = encoding.GetString(
-                            array,
-                            0,
-                            array.Length - 1);
-                        log.LogInformation($"{value.Tag}: Byte array: {text}");
-                    }
-                    else
-                    {
-                        if (value.Tag == ExifTag.GPSLatitude
-                            || value.Tag == ExifTag.GPSLongitude)
+                        log.LogInformation($"{value.Tag}: {coordinate}");
+
+                        if (value.Tag == ExifTag.GPSLatitude)
                         {
-                            var latitudeArray = (Rational[])value.GetValue();
-                            var latitude =
-                                latitudeArray[0].Numerator
-                                + (latitudeArray[1].Numerator / 60D)
-                                + ((latitudeArray[2].Numerator / 1000000D) / 3600D);
-
-                            log.LogInformation($"{value.Tag}: {latitude}");
+                            existingMedata.Latitude = coordinate;
                         }
                         else
                         {
-                            log.LogInformation($"{value.Tag}: Not a byte array");
+                            existingMedata.Longitude = coordinate;
                         }
                     }
                 }
@@ -92,13 +118,32 @@ namespace TestExifFunctions
                         value.TrySetValue(string.Empty);
                     }
 
-                    if (value.Tag == ExifTag.Artist
-                        && valueString != ArtistName)
+                    if (value.Tag == ExifTag.ImageDescription)
                     {
-                        value.TrySetValue(ArtistName);
+                        existingMedata.Description = valueString;
+                    }
+                    else if (value.Tag == ExifTag.ImageDescription)
+                    {
+                        existingMedata.Description = valueString;
+                    }
+                    else if (value.Tag == ExifTag.Make)
+                    {
+                        existingMedata.CameraMake = valueString;
+                    }
+                    else if (value.Tag == ExifTag.Model)
+                    {
+                        existingMedata.CameraModel = valueString;
+                    }
+                    else if (value.Tag == ExifTag.DateTimeOriginal)
+                    {
+                        existingMedata.TakenDateTime = valueString;
                     }
                 }
             }
+
+            // Call synchronous function to save in Azure CosmosDB
+
+            await collector.AddAsync(existingMedata);
 
             log.LogInformation($"Saving {blobName} to outputs");
             await image.SaveAsync(outputBlob, format);
