@@ -1,0 +1,4 @@
+### LOCAL
+GET http://localhost:7041/api/add-metadata/el20221202018D.jpg
+
+### REMOTE
