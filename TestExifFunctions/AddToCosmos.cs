@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using TestExifFunctions.Model;
+using System.Threading.Tasks;
+using System;
 
 namespace TestExifFunctions
 {
@@ -13,7 +15,7 @@ namespace TestExifFunctions
         private const string UniquePartitionKey = "partition";
 
         [FunctionName("AddToCosmos")]
-        public static void Run(
+        public static async Task Run(
             [HttpTrigger(
                 AuthorizationLevel.Anonymous, 
                 "post", 
@@ -23,14 +25,22 @@ namespace TestExifFunctions
                 databaseName: "PicturesDb",
                 containerName: "Pictures",
                 Connection = "CosmosDBConnection",
-                CreateIfNotExists = true,
                 PartitionKey = "partition")]
-            out PictureMetadata outputMetadata,
+            IAsyncCollector<PictureMetadata> output,
             ILogger log)
         {
             string requestBody = new StreamReader(req.Body).ReadToEnd();
-            outputMetadata = JsonConvert.DeserializeObject<PictureMetadata>(requestBody);
+            var outputMetadata = JsonConvert.DeserializeObject<PictureMetadata>(requestBody);
             outputMetadata.PartitionKey = UniquePartitionKey;
+
+            try
+            {
+                await output.AddAsync(outputMetadata);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }

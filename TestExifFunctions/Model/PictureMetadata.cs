@@ -4,7 +4,7 @@ namespace TestExifFunctions.Model
 {
     public class PictureMetadata
     {
-        private const string GoogleMapsMask = "https://www.google.ch/maps/@{0},{1}";
+        private const string GoogleMapsMask = "https://www.google.com/maps/search/?api=1&query={0},{1}";
 
         [JsonProperty("id")] 
         public string Id => Name;
@@ -26,5 +26,7 @@ namespace TestExifFunctions.Model
         public string CameraMake { get; set; }
 
         public string CameraModel { get; set; }
+
+        public string GoogleLocationUrl => string.Format(GoogleMapsMask, Latitude, Longitude);
     }
 }

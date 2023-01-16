@@ -1,11 +1,11 @@
 ### LOCAL
-GET http://localhost:7041/api/add-metadata/el20221202018D.jpg
+GET http://localhost:7041/api/add-metadata/el20221125005.jpg
 
 ### Add metadata
 
  POST http://localhost:7041/api/add-to-cosmos
 
  {
-    "Name" : "el20010101001.jpg",
-    "CameraMake" : "DJI"
+    "Name" : "el20010101002.jpg",
+    "CameraMake" : "DJI3"
  }

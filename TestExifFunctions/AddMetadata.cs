@@ -71,17 +71,6 @@ namespace TestExifFunctions
                 PartitionKey = UniquePartitionKey
             };
 
-            //if (existingMedata == null)
-            //{
-            //    var existingMedata = new PictureMetadata
-            //    {
-            //        Name = blobName,
-            //        id = blobName.Replace(".", "-"),
-            //        Artist = ArtistName,
-            //        PartitionKey = UniquePartitionKey
-            //    };
-            //}
-
             foreach (var value in values)
             {
                 if (value.IsArray)
