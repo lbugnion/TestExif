@@ -8,8 +8,8 @@ POST http://localhost:7041/api/set-metadata/el20221106002.jpg
     "description" : "This is a test description"
 }
 
-### REMOTE Save
-GET https://testexiflinux.azurewebsites.net/api/add-metadata/20221130_110247.jpg
+### REMOTE Add
+GET https://testexiflinux.azurewebsites.net/api/add-metadata/el20221106002.jpg
 
 ### LOCAL Get
 GET http://localhost:7041/api/metadata/el20221202018D.jpg
