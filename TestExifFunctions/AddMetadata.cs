@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -6,15 +5,12 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp;
-using System.Text;
 using TestExifFunctions.Model;
-using System.Configuration;
-using System.Net.Http;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage;
+using System;
 
 namespace TestExifFunctions
 {
@@ -22,6 +18,8 @@ namespace TestExifFunctions
     {
         private const string ArtistName = "Laurent Bugnion";
         private const string UniquePartitionKey = "partition";
+
+        private const string UploadsFolderName = "uploads";
 
         [FunctionName(nameof(AddMetadata))]
         public static async Task<IActionResult> Run(
@@ -31,18 +29,10 @@ namespace TestExifFunctions
                 Route = "add-metadata/{blobName}")]
             HttpRequest req,
             string blobName,
-            [Blob($"uploads/{{blobName}}", FileAccess.Read, Connection = "AzureWebJobsStorage")]
+            [Blob($"{UploadsFolderName}/{{blobName}}", FileAccess.Read, Connection = "AzureWebJobsStorage")]
             Stream inputBlob,
-            [Blob($"outputs/{{blobName}}", FileAccess.Write, Connection = "AzureWebJobsStorage")]
+            [Blob("outputs/{blobName}", FileAccess.Write, Connection = "AzureWebJobsStorage")]
             Stream outputBlob,
-            //[CosmosDB(
-            //    databaseName: "PicturesDb",
-            //    containerName: "Pictures",
-            //    Connection = "CosmosDBConnection",
-            //    CreateIfNotExists = true,
-            //    PartitionKey = "partition",
-            //    Id = "{blobName}")]
-            //PictureMetadata existingMedata,
             [CosmosDB(
                 databaseName: "PicturesDb",
                 containerName: "Pictures",
@@ -59,84 +49,92 @@ namespace TestExifFunctions
                 return new BadRequestObjectResult(message);
             }
 
-            var tuple = await Image.LoadWithFormatAsync(inputBlob);
-            var image = tuple.Image;
-            var format = tuple.Format;
-            var values = image.Metadata.ExifProfile.Values;
-
-            var existingMedata = new PictureMetadata
+            try
             {
-                Name = blobName,
-                Artist = ArtistName,
-                PartitionKey = UniquePartitionKey
-            };
+                var tuple = await Image.LoadWithFormatAsync(inputBlob);
+                var image = tuple.Image;
+                var format = tuple.Format;
+                var values = image.Metadata.ExifProfile.Values;
 
-            foreach (var value in values)
-            {
-                if (value.IsArray)
+                var existingMedata = new PictureMetadata
                 {
-                    if (value.Tag == ExifTag.GPSLatitude
-                        || value.Tag == ExifTag.GPSLongitude)
+                    Name = blobName,
+                    Artist = ArtistName,
+                    PartitionKey = UniquePartitionKey
+                };
+
+                foreach (var value in values)
+                {
+                    if (value.IsArray)
                     {
-                        var coordinateArray = (Rational[])value.GetValue();
-                        var coordinate =
-                            coordinateArray[0].Numerator
-                            + (coordinateArray[1].Numerator / 60D)
-                            + ((coordinateArray[2].Numerator / 1000000D) / 3600D);
-
-                        log.LogInformation($"{value.Tag}: {coordinate}");
-
-                        if (value.Tag == ExifTag.GPSLatitude)
+                        if (value.Tag == ExifTag.GPSLatitude
+                            || value.Tag == ExifTag.GPSLongitude)
                         {
-                            existingMedata.Latitude = coordinate;
+                            var coordinateArray = (Rational[])value.GetValue();
+                            var coordinate =
+                                coordinateArray[0].Numerator
+                                + (coordinateArray[1].Numerator / 60D)
+                                + ((coordinateArray[2].Numerator / coordinateArray[2].Denominator) / 3600D);
+
+                            log.LogInformation($"{value.Tag}: {coordinate}");
+
+                            if (value.Tag == ExifTag.GPSLatitude)
+                            {
+                                existingMedata.Latitude = coordinate;
+                            }
+                            else
+                            {
+                                existingMedata.Longitude = coordinate;
+                            }
                         }
-                        else
+                    }
+                    else
+                    {
+                        var valueString = value.GetValue().ToString();
+
+                        log.LogInformation($"{value.Tag}: {valueString}");
+
+                        if (valueString.Contains("LogoLicious"))
                         {
-                            existingMedata.Longitude = coordinate;
+                            value.TrySetValue(string.Empty);
+                        }
+
+                        if (value.Tag == ExifTag.ImageDescription)
+                        {
+                            existingMedata.Description = valueString;
+                        }
+                        else if (value.Tag == ExifTag.ImageDescription)
+                        {
+                            existingMedata.Description = valueString;
+                        }
+                        else if (value.Tag == ExifTag.Make)
+                        {
+                            existingMedata.CameraMake = valueString;
+                        }
+                        else if (value.Tag == ExifTag.Model)
+                        {
+                            existingMedata.CameraModel = valueString;
+                        }
+                        else if (value.Tag == ExifTag.DateTimeOriginal)
+                        {
+                            existingMedata.TakenDateTime = valueString;
                         }
                     }
                 }
-                else
-                {
-                    var valueString = value.GetValue().ToString();
 
-                    log.LogInformation($"{value.Tag}: {valueString}");
+                // Call synchronous function to save in Azure CosmosDB
 
-                    if (valueString.Contains("LogoLicious"))
-                    {
-                        value.TrySetValue(string.Empty);
-                    }
+                await collector.AddAsync(existingMedata);
 
-                    if (value.Tag == ExifTag.ImageDescription)
-                    {
-                        existingMedata.Description = valueString;
-                    }
-                    else if (value.Tag == ExifTag.ImageDescription)
-                    {
-                        existingMedata.Description = valueString;
-                    }
-                    else if (value.Tag == ExifTag.Make)
-                    {
-                        existingMedata.CameraMake = valueString;
-                    }
-                    else if (value.Tag == ExifTag.Model)
-                    {
-                        existingMedata.CameraModel = valueString;
-                    }
-                    else if (value.Tag == ExifTag.DateTimeOriginal)
-                    {
-                        existingMedata.TakenDateTime = valueString;
-                    }
-                }
+                log.LogInformation($"Saving {blobName} to outputs");
+                await image.SaveAsync(outputBlob, format);
+                return new OkObjectResult(blobName);
             }
-
-            // Call synchronous function to save in Azure CosmosDB
-
-            await collector.AddAsync(existingMedata);
-
-            log.LogInformation($"Saving {blobName} to outputs");
-            await image.SaveAsync(outputBlob, format);
-            return new OkObjectResult(blobName);
+            catch (Exception ex)
+            {
+                log.LogError(ex.Message);
+                return new UnprocessableEntityObjectResult(ex.Message);
+            }
         }
     }
 }
