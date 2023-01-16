@@ -77,7 +77,7 @@
         }
 
         function getPictures() {
-            return axios.get(`${window.apiBaseUrl}/api/pictures??ticks=${new Date().getTime()}`, null, getAxiosConfig())
+            return axios.get(`${window.apiBaseUrl}/api/pictures?ticks=${new Date().getTime()}`, null, getAxiosConfig())
                 .then(resp => resp.data);
         }
 
