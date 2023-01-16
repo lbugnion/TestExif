@@ -94,7 +94,7 @@
                     data.isSending = true;
                     data.hasError = false;
                     data.errorMessage = null;
-                    axios.post(`${window.apiBaseUrl}/api/picture/?ticks=${new Date().getTime()}`, picture, getAxiosConfig())
+                    axios.post(`${window.apiBaseUrl}/api/picture/${data.picture.name}`, picture, getAxiosConfig())
                         .then(resp => {
 
                             data.isSending = false;
