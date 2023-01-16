@@ -25,27 +25,14 @@ namespace TestExifFunctions
         {
             try
             {
-                var results = new List<PictureMetadata>
-                {
-                    new PictureMetadata
-                    {
-                        Name = "123.jpg",
-                    },
-                    new PictureMetadata
-                    {
-                        Name = "456.jpg",
-                    }
-                };
+                var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
+                var client = new CosmosClient(connection);
 
+                var container = client.GetContainer(Constants.DatabaseName, Constants.ContainerName);
 
-                //var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
-                //var client = new CosmosClient(connection);
-
-                //var container = client.GetContainer(Constants.DatabaseName, Constants.ContainerName);
-
-                //var q = container.GetItemLinqQueryable<PictureMetadata>();
-                //var iterator = q.ToFeedIterator();
-                //var results = await iterator.ReadNextAsync();
+                var q = container.GetItemLinqQueryable<PictureMetadata>();
+                var iterator = q.ToFeedIterator();
+                var results = await iterator.ReadNextAsync();
 
                 return new OkObjectResult(results);
             }

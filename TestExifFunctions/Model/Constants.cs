@@ -4,7 +4,6 @@
     {
         public const string ArtistName = "Laurent Bugnion";
         public const string AzureWebJobsStorageVariableName = "AzureWebJobsStorage";
-        public const string AzureStorageVariableName = "AzureStorage";
         public const string ContainerName = "Pictures";
         public const string CosmosDBConnectionVariableName = "CosmosDBConnection";
         public const string DatabaseName = "PicturesDb";
