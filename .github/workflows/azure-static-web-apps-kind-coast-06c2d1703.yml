@@ -4,10 +4,16 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'ClientBackend/**'
+      - 'TestWebClient/wwwroot/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - 'ClientBackend/**'
+      - 'TestWebClient/wwwroot/**'
 
 jobs:
   build_and_deploy_job:
