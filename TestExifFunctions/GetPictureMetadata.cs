@@ -1,27 +1,24 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SixLabors.ImageSharp;
-using TestExifFunctions.Model;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
+using TestExifFunctions.Model;
 
 namespace TestExifFunctions
 {
-    public static class GetImageMetadata
+    public static class GetPictureMetadata
     {
-        [FunctionName("GetImageMetadata")]
+        [FunctionName(nameof(GetPictureMetadata))]
         public static async Task<IActionResult> Run(
             [HttpTrigger(
-                AuthorizationLevel.Anonymous, 
-                "get", 
+                AuthorizationLevel.Anonymous,
+                "get",
                 Route = "metadata/{blobName}")]
             HttpRequest req,
             string blobName,

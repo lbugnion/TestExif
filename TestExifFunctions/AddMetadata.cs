@@ -1,14 +1,14 @@
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp;
-using TestExifFunctions.Model;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using System;
+using System.IO;
+using System.Threading.Tasks;
+using TestExifFunctions.Model;
 
 namespace TestExifFunctions
 {
@@ -23,13 +23,13 @@ namespace TestExifFunctions
             HttpRequest req,
             string blobName,
             [Blob(
-                $"{Constants.UploadsFolderName}/{{blobName}}", 
-                FileAccess.Read, 
+                $"{Constants.UploadsFolderName}/{{blobName}}",
+                FileAccess.Read,
                 Connection = Constants.AzureWebJobsStorageVariableName)]
             Stream inputBlob,
             [Blob(
-                "outputs/{blobName}", 
-                FileAccess.Write, 
+                "outputs/{blobName}",
+                FileAccess.Write,
                 Connection = Constants.AzureWebJobsStorageVariableName)]
             Stream outputBlob,
             [CosmosDB(

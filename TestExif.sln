@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExif", "TestExif\TestEx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExifFunctions", "TestExifFunctions\TestExifFunctions.csproj", "{7E69C289-CA4C-49FF-9C91-F7083FE64C75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebClient", "TestWebClient\TestWebClient.csproj", "{38B23E1B-42D2-451E-8374-08658895AAB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7E69C289-CA4C-49FF-9C91-F7083FE64C75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E69C289-CA4C-49FF-9C91-F7083FE64C75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E69C289-CA4C-49FF-9C91-F7083FE64C75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38B23E1B-42D2-451E-8374-08658895AAB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B23E1B-42D2-451E-8374-08658895AAB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B23E1B-42D2-451E-8374-08658895AAB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B23E1B-42D2-451E-8374-08658895AAB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
