@@ -3,10 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using TestExifFunctions.Model;
 
@@ -27,11 +30,6 @@ namespace TestExifFunctions
                 FileAccess.Read,
                 Connection = Constants.AzureWebJobsStorageVariableName)]
             Stream inputBlob,
-            [Blob(
-                "outputs/{blobName}",
-                FileAccess.Write,
-                Connection = Constants.AzureWebJobsStorageVariableName)]
-            Stream outputBlob,
             [CosmosDB(
                 databaseName: Constants.DatabaseName,
                 containerName: Constants.ContainerName,
@@ -64,6 +62,17 @@ namespace TestExifFunctions
                     PartitionKey = Constants.UniquePartitionKey,
                     BlobUrl = string.Format(blobUrlMask, blobName)
                 };
+
+                var artistValue = values.FirstOrDefault(v => v.Tag == ExifTag.Artist);
+
+                if (artistValue == null)
+                {
+                    image.Metadata.ExifProfile.SetValue(ExifTag.Artist, Constants.ArtistName);
+                }
+                else
+                {
+                    artistValue.TrySetValue(Constants.ArtistName);
+                }
 
                 foreach (var value in values)
                 {
@@ -129,7 +138,24 @@ namespace TestExifFunctions
                 await collector.AddAsync(existingMedata);
 
                 log.LogInformation($"Saving {blobName} to outputs");
-                await image.SaveAsync(outputBlob, format);
+
+                var account = CloudStorageAccount.Parse(
+                    Environment.GetEnvironmentVariable(Constants.AzureWebJobsStorageVariableName));
+
+                var client = account.CreateCloudBlobClient();
+
+                var targetContainer = client.GetContainerReference(Constants.OutputFolderName);
+
+                var outputBlob = targetContainer.GetBlockBlobReference(blobName);
+                outputBlob.Properties.ContentType = "image/jpg";
+
+                using (var outputStream = new MemoryStream()) 
+                {
+                    await image.SaveAsync(outputStream, format);
+                    outputStream.Position = 0;
+                    await outputBlob.UploadFromStreamAsync(outputStream);
+                }
+
                 return new OkObjectResult(blobName);
             }
             catch (Exception ex)

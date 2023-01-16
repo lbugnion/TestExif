@@ -1,0 +1,42 @@
+﻿body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 10px;
+}
+
+a {
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+.container {
+    margin: 0;
+}
+
+table {
+    width: 80%;
+    border-left: solid 1px grey;
+    border-top: solid 1px grey;
+}
+
+td {
+    border-bottom: solid 1px grey;
+    border-right: solid 1px grey;
+    padding: 5px;
+}
+
+    td.title-cell {
+        font-weight: bold;
+        background-color: #CCCCCC;
+    }
+
+ul {
+    margin-top: 10px;
+}
+
+#message-box {
+    width: 400px;
+}

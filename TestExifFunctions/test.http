@@ -1,11 +1,26 @@
-### LOCAL Save
-GET http://localhost:7041/api/add-metadata/el20221202018D.jpg
+### LOCAL Add
+GET http://localhost:7041/api/add-metadata/el20221106002.jpg
+
+### LOCAL Set
+POST http://localhost:7041/api/set-metadata/el20221106002.jpg
+
+{
+    "description" : "This is a test description"
+}
 
 ### REMOTE Save
-GET https://testexiflinux.azurewebsites.net/api/add-metadata/el20221202018D.jpg
+GET https://testexiflinux.azurewebsites.net/api/add-metadata/20221130_110247.jpg
 
 ### LOCAL Get
 GET http://localhost:7041/api/metadata/el20221202018D.jpg
 
 ### LOCAL Get all pictures
-GET http://localhost:7041/api/pictures
+GET http://localhost:7024/api/pictures
+
+### LOCAL Set picture
+POST http://localhost:7024/api/picture
+
+{
+    "name": "el20221106002.jpg",
+    "description": "Another test description"
+}
