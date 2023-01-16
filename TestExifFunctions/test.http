@@ -1,5 +1,5 @@
 ### LOCAL Add
-GET http://localhost:7041/api/add-metadata/el20221106002.jpg
+GET http://localhost:7041/api/add-metadata/el20221203006.jpg
 
 ### REMOTE Add
 GET https://testexiflinux.azurewebsites.net/api/add-metadata/el20221106002.jpg

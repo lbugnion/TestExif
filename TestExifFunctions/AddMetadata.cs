@@ -108,6 +108,7 @@ namespace TestExifFunctions
                         if (valueString.Contains("LogoLicious"))
                         {
                             value.TrySetValue(string.Empty);
+                            valueString = string.Empty;
                         }
 
                         if (value.Tag == ExifTag.ImageDescription)
