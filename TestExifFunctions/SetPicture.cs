@@ -53,6 +53,7 @@ namespace ClientBackend
             }
             catch (Exception ex)
             {
+                log.LogError(ex.Message);
                 return new UnprocessableEntityObjectResult(ex.Message);
             }
         }
