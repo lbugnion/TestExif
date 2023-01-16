@@ -8,19 +8,12 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp;
 using TestExifFunctions.Model;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage;
 using System;
 
 namespace TestExifFunctions
 {
     public static class AddMetadata
     {
-        private const string ArtistName = "Laurent Bugnion";
-        private const string UniquePartitionKey = "partition";
-
-        private const string UploadsFolderName = "uploads";
-
         [FunctionName(nameof(AddMetadata))]
         public static async Task<IActionResult> Run(
             [HttpTrigger(
@@ -29,16 +22,22 @@ namespace TestExifFunctions
                 Route = "add-metadata/{blobName}")]
             HttpRequest req,
             string blobName,
-            [Blob($"{UploadsFolderName}/{{blobName}}", FileAccess.Read, Connection = "AzureWebJobsStorage")]
+            [Blob(
+                $"{Constants.UploadsFolderName}/{{blobName}}", 
+                FileAccess.Read, 
+                Connection = Constants.AzureWebJobsStorageVariableName)]
             Stream inputBlob,
-            [Blob("outputs/{blobName}", FileAccess.Write, Connection = "AzureWebJobsStorage")]
+            [Blob(
+                "outputs/{blobName}", 
+                FileAccess.Write, 
+                Connection = Constants.AzureWebJobsStorageVariableName)]
             Stream outputBlob,
             [CosmosDB(
-                databaseName: "PicturesDb",
-                containerName: "Pictures",
-                Connection = "CosmosDBConnection",
+                databaseName: Constants.DatabaseName,
+                containerName: Constants.ContainerName,
+                Connection = Constants.CosmosDBConnectionVariableName,
                 CreateIfNotExists = true,
-                PartitionKey = "partition")]
+                PartitionKey = Constants.UniquePartitionKey)]
             IAsyncCollector<PictureMetadata> collector,
             ILogger log)
         {
@@ -59,8 +58,8 @@ namespace TestExifFunctions
                 var existingMedata = new PictureMetadata
                 {
                     Name = blobName,
-                    Artist = ArtistName,
-                    PartitionKey = UniquePartitionKey
+                    Artist = Constants.ArtistName,
+                    PartitionKey = Constants.UniquePartitionKey
                 };
 
                 foreach (var value in values)

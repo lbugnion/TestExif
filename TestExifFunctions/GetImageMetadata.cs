@@ -17,9 +17,6 @@ namespace TestExifFunctions
 {
     public static class GetImageMetadata
     {
-        private const string UploadsFolderName = "uploads";
-        private const string UniquePartitionKey = "partition";
-
         [FunctionName("GetImageMetadata")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(
@@ -28,19 +25,12 @@ namespace TestExifFunctions
                 Route = "metadata/{blobName}")]
             HttpRequest req,
             string blobName,
-            //[CosmosDB(
-            //    databaseName: "PicturesDb",
-            //    containerName: "Pictures",
-            //    Connection = "CosmosDBConnection",
-            //    PartitionKey = "partition",
-            //    Id = "{blobName}")]
-            //PictureMetadata existingMedata,
             ILogger log)
         {
-            var connection = Environment.GetEnvironmentVariable("CosmosDBConnection");
+            var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
             var client = new CosmosClient(connection);
 
-            var container = client.GetContainer("PicturesDb", "Pictures");
+            var container = client.GetContainer(Constants.DatabaseName, Constants.ContainerName);
 
             var q = container.GetItemLinqQueryable<PictureMetadata>();
             var iterator = q.Where(p => p.Name == blobName).ToFeedIterator();
