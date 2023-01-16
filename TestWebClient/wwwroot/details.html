@@ -112,6 +112,15 @@
                             }
                             else {
                                 data.picture.description = data.currentDescription;
+
+                                if (data.picture.description == null
+                                    || data.picture.description == "") {
+                                    data.picture.mustEdit = "X";
+                                }
+                                else {
+                                    data.picture.mustEdit = "";
+                                }
+
                                 var json = JSON.stringify(data.pictures);
                                 localStorage.setItem("pictures", json);
                             }
@@ -121,6 +130,14 @@
                             data.hasError = true;
                             data.isSending = false;
                             data.errorMessage = "Impossible to send";
+
+                            if (data.picture.description == null
+                                || data.picture.description == "") {
+                                data.picture.mustEdit = "X";
+                            }
+                            else {
+                                data.picture.mustEdit = "";
+                            }
                         });
                 }
             }
