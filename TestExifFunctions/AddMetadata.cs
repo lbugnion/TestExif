@@ -13,11 +13,11 @@ using System.Text;
 
 namespace TestExifFunctions
 {
-    public static class Function1
+    public static class AddMetadata
     {
         private const string ArtistName = "Laurent Bugnion";
 
-        [FunctionName("Function1")]
+        [FunctionName(nameof(AddMetadata))]
         public static async Task<IActionResult> Run(
             [HttpTrigger(
                 AuthorizationLevel.Anonymous,
