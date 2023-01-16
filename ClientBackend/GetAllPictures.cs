@@ -22,16 +22,22 @@ namespace TestExifFunctions
             HttpRequest req,
             ILogger log)
         {
-            var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
-            var client = new CosmosClient(connection);
+            try
+            {
+                var connection = Environment.GetEnvironmentVariable(Constants.CosmosDBConnectionVariableName);
+                var client = new CosmosClient(connection);
 
-            var container = client.GetContainer(Constants.DatabaseName, Constants.ContainerName);
+                var container = client.GetContainer(Constants.DatabaseName, Constants.ContainerName);
 
-            var q = container.GetItemLinqQueryable<PictureMetadata>();
-            var iterator = q.ToFeedIterator();
-            var results = await iterator.ReadNextAsync();
-
-            return new OkObjectResult(results);
+                var q = container.GetItemLinqQueryable<PictureMetadata>();
+                var iterator = q.ToFeedIterator();
+                var results = await iterator.ReadNextAsync();
+                return new OkObjectResult(results);
+            }
+            catch (Exception ex)
+            {
+                return new UnprocessableEntityObjectResult(ex.Message);
+            }
         }
     }
 }
