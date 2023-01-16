@@ -1,5 +1,8 @@
-### LOCAL
+### LOCAL Save
 GET http://localhost:7041/api/add-metadata/el20221202018D.jpg
 
-### REMOTE
+### REMOTE Save
 GET https://testexiflinux.azurewebsites.net/api/add-metadata/el20221202018D.jpg
+
+### LOCAL Get
+GET http://localhost:7041/api/metadata/el20221202018D.jpg
