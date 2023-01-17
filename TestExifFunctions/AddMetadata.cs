@@ -113,6 +113,12 @@ namespace TestExifFunctions
 
                         if (value.Tag == ExifTag.ImageDescription)
                         {
+                            if (valueString == "default")
+                            {
+                                value.TrySetValue(string.Empty);
+                                valueString = string.Empty;
+                            }
+
                             existingMedata.Description = valueString;
                         }
                         else if (value.Tag == ExifTag.ImageDescription)
