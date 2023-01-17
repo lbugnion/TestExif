@@ -1,0 +1,163 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Condition": {
+                "actions": {
+                    "Create_block_blob_(V2)": {
+                        "inputs": {
+                            "body": "@body('Get_file_content')",
+                            "headers": {
+                                "Content-Type": "image/jpg"
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/v2/codeless/datasets/@{encodeURIComponent('AccountNameFromSettings')}/CreateBlockBlob",
+                            "queries": {
+                                "folderPath": "/uploads",
+                                "name": "@triggerBody()?['Name']"
+                            }
+                        },
+                        "runAfter": {
+                            "Get_file_content": [
+                                "Succeeded"
+                            ]
+                        },
+                        "runtimeConfiguration": {
+                            "contentTransfer": {
+                                "transferMode": "Chunked"
+                            }
+                        },
+                        "type": "ApiConnection"
+                    },
+                    "Get_file_content": {
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['onedrive']['connectionId']"
+                                }
+                            },
+                            "method": "get",
+                            "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(triggerBody()?['Id']))}/content",
+                            "queries": {
+                                "inferContentType": true
+                            }
+                        },
+                        "runAfter": {},
+                        "type": "ApiConnection"
+                    },
+                    "HTTP": {
+                        "inputs": {
+                            "method": "GET",
+                            "uri": "https://testexiflinux.azurewebsites.net/api/add-metadata/@{triggerBody()?['Name']}"
+                        },
+                        "runAfter": {
+                            "Create_block_blob_(V2)": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "Http"
+                    },
+                    "Post_message_in_a_chat_or_channel": {
+                        "inputs": {
+                            "body": {
+                                "messageBody": "<p>The file is ready: @{triggerBody()?['Name']}</p>",
+                                "recipient": "lbugnion@microsoft.com"
+                            },
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['teams']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "path": "/beta/teams/conversation/message/poster/Flow bot/location/@{encodeURIComponent('Chat with Flow bot')}"
+                        },
+                        "runAfter": {
+                            "HTTP": [
+                                "Succeeded"
+                            ]
+                        },
+                        "type": "ApiConnection"
+                    }
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "endsWith": [
+                                "@triggerBody()?['Name']",
+                                ".jpg"
+                            ]
+                        }
+                    ]
+                },
+                "runAfter": {},
+                "type": "If"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_a_file_is_created_(properties_only)": {
+                "evaluatedRecurrence": {
+                    "frequency": "Minute",
+                    "interval": 3
+                },
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['onedrive']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/datasets/default/triggers/batch/onnewfilesv2",
+                    "queries": {
+                        "folderId": "FB0D8F97004979CD!906643",
+                        "includeSubfolders": false,
+                        "maxFileCount": 1,
+                        "simulate": false
+                    }
+                },
+                "metadata": {
+                    "FB0D8F97004979CD!906643": "/_NewPictures"
+                },
+                "recurrence": {
+                    "frequency": "Minute",
+                    "interval": 3
+                },
+                "splitOn": "@triggerBody()",
+                "type": "ApiConnection"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azureblob": {
+                    "connectionId": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/resourceGroups/TestExifLinux/providers/Microsoft.Web/connections/azureblob",
+                    "connectionName": "azureblob",
+                    "id": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
+                },
+                "onedrive": {
+                    "connectionId": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/resourceGroups/TestExifLinux/providers/Microsoft.Web/connections/onedrive",
+                    "connectionName": "onedrive",
+                    "id": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/providers/Microsoft.Web/locations/westeurope/managedApis/onedrive"
+                },
+                "teams": {
+                    "connectionId": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/resourceGroups/TestExifLinux/providers/Microsoft.Web/connections/teams",
+                    "connectionName": "teams",
+                    "id": "/subscriptions/6e69cf24-0859-4dec-84e2-695e2618e473/providers/Microsoft.Web/locations/westeurope/managedApis/teams"
+                }
+            }
+        }
+    }
+}
