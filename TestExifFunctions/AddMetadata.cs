@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
@@ -156,7 +155,7 @@ namespace TestExifFunctions
                 var outputBlob = targetContainer.GetBlockBlobReference(blobName);
                 outputBlob.Properties.ContentType = "image/jpg";
 
-                using (var outputStream = new MemoryStream()) 
+                using (var outputStream = new MemoryStream())
                 {
                     await image.SaveAsync(outputStream, format);
                     outputStream.Position = 0;

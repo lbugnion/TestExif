@@ -1,19 +1,17 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using TestExifFunctions.Model;
-using System.Net.Http;
-using ClientBackend.Model;
 using Microsoft.WindowsAzure.Storage;
-using SixLabors.ImageSharp.Metadata.Profiles.Exif;
+using Newtonsoft.Json;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
+using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using TestExifFunctions.Model;
 
 namespace ClientBackend
 {
@@ -23,8 +21,8 @@ namespace ClientBackend
         public static async Task<IActionResult> Run(
             [HttpTrigger(
                 AuthorizationLevel.Anonymous,
-                "post", 
-                Route = "picture/{pictureName}")] 
+                "post",
+                Route = "picture/{pictureName}")]
             HttpRequest req,
             string pictureName,
             [CosmosDB(

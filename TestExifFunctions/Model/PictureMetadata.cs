@@ -8,6 +8,8 @@ namespace TestExifFunctions.Model
 
         public string Artist { get; set; }
 
+        public string BlobUrl { get; set; }
+
         public string CameraMake { get; set; }
 
         public string CameraModel { get; set; }
@@ -28,7 +30,5 @@ namespace TestExifFunctions.Model
         public string PartitionKey { get; set; }
 
         public string TakenDateTime { get; set; }
-
-        public string BlobUrl { get; set; }
     }
 }
